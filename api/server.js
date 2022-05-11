@@ -1,6 +1,15 @@
 const express = require("express");
-
 const server = express();
+const usersRouter = require("./users/users-router");
+const {
+  logger,
+  validateUserId,
+  validateUser,
+  validatePost,
+} = require("./middleware/middleware");
+
+server.use("/api/users", usersRouter);
+server.use(logger);
 
 server.use(express.json());
 

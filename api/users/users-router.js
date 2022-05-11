@@ -7,6 +7,12 @@ const {
   update,
   remove,
 } = require("./users-model");
+const {
+  logger,
+  validateUserId,
+  validateUser,
+  validatePost,
+} = require("../middleware/middleware");
 
 const posts = require("../posts/posts-model");
 
@@ -21,7 +27,7 @@ router.get("/", (req, res) => {
   });
 });
 
-router.get("/:id", (req, res) => {
+router.get("/:id", validateUserId, (req, res) => {
   const user = getById(req.params.id).then((user) => {
     if (user == null) {
       res.status(404).json({ message: "User not found" });
@@ -46,12 +52,17 @@ router.put("/:id", (req, res) => {
   // and another middleware to check that the request body is valid
 });
 
-router.delete("/:id", (req, res) => {
-  // RETURN THE FRESHLY DELETED USER OBJECT
-  // this needs a middleware to verify user id
+router.delete("/:id", validateUserId, (req, res) => {
+  remove(req.params.id).then((result) => {
+    res.status(200).json(req.user);
+  });
 });
 
-router.get("/:id/posts", (req, res) => {
+router.get("/:id/posts", validateUserId, (req, res) => {
+  getUserPosts(req.params.id).then((posts) => {
+    res.status(200).json(posts);
+  });
+
   // RETURN THE ARRAY OF USER POSTS
   // this needs a middleware to verify user id
 });
