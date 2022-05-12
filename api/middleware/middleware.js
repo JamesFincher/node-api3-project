@@ -1,42 +1,49 @@
-const User = require("../users/users-model");
+const Users = require("../users/users-model");
 
 function logger(req, res, next) {
   // DO YOUR MAGIC
-
-  const timestamp = new Date().toLocaleString();
-  const method = req.method;
-  const url = req.originalUrl;
-
-  console.log(`${timestamp} ${method} to ${url}`);
+  console.log(req.method, req.url, new Date());
+  next();
 }
 
-async function validateUserId(req, res, next) {
-  try {
-    const user = await User.getById(req.params.id);
-
-    if (!user) {
-      res.status(404).json({ message: "User not found" });
-    } else {
-      req.user = user;
-      next();
-    }
-  } catch {
-    res.status(500).json({ message: "Error validating user id" });
-  }
+function validateUserId(req, res, next) {
+  // DO YOUR MAGIC
+  const id = req.params.id;
+  Users.getById(id)
+    .then((user) => {
+      if (user) {
+        req.user = user;
+        next();
+      } else {
+        res.status(404).json({ message: "user not found" });
+      }
+    })
+    .catch((err) =>
+      next({ message: "Something went very wrong trying to validate User Id" })
+    );
 }
 
 function validateUser(req, res, next) {
   // DO YOUR MAGIC
-  console.log("validateUser middleware");
+  const { name } = req.body;
+  if (!name) {
+    res.status(400).json({ message: "missing required name field" });
+  } else {
+    next();
+  }
 }
 
 function validatePost(req, res, next) {
   // DO YOUR MAGIC
-  console.log("validatePost middleware");
+  const { text } = req.body;
+  if (!text) {
+    res.status(400).json({ message: "missing required text field" });
+  } else {
+    next();
+  }
 }
 
 // do not forget to expose these functions to other modules
-
 module.exports = {
   logger,
   validateUserId,
